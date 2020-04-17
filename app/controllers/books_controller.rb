@@ -3,7 +3,7 @@ class BooksController < ApplicationController
 
   # GET /books
   def index
-    @books = [1,2,4,5] #Book.all
+    @books = Book.all
 
     render json: @books
   end
@@ -18,6 +18,7 @@ class BooksController < ApplicationController
     @book = Book.new(book_params)
 
     if @book.save
+      NotificationJob.perform_later(:@book)
       render json: @book, status: :created, location: @book
     else
       render json: @book.errors, status: :unprocessable_entity
@@ -46,6 +47,6 @@ class BooksController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def book_params
-      params.fetch(:book, {})
+      params.fetch(:book, {}).permit(:name, :email)
     end
 end
